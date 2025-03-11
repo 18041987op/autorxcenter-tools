@@ -24,11 +24,11 @@ app.get('/', (req, res) => {
   res.send('API del Sistema de Control de Herramientas funcionando correctamente');
 });
 
-// Importar y usar rutas
-app.use('/api/tools', require('./src/routes/tools.routes'));
-app.use('/api/users', require('./src/routes/users.routes'));
-app.use('/api/loans', require('./src/routes/loans.routes'));
-app.use('/api/notifications', require('./src/routes/notifications.routes'));
+// Importar y usar rutas (haremos una modificacion aqui, removeremos el /src esto porque estamos teniendo problemas en Render)
+app.use('/api/tools', require('./routes/tools.routes'));
+app.use('/api/users', require('./routes/users.routes'));
+app.use('/api/loans', require('./routes/loans.routes'));
+app.use('/api/notifications', require('./routes/notifications.routes'));
 
 // Configuración del puerto
 const PORT = process.env.PORT || 5000;
