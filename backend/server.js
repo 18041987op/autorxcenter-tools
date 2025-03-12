@@ -44,6 +44,11 @@ try {
   console.error("❌ Error cargando las rutas:", error.message);
 }
 
+// Servir archivos estáticos del frontend
+// Ajusta la ruta según la estructura de tu proyecto
+app.use(express.static(path.join(__dirname, '../frontend/src')));
+
+
 // Añadir una ruta para ver todas las rutas disponibles
 app.get('/api/routes', (req, res) => {
   try {
