@@ -3,6 +3,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const dotenv = require('dotenv');
+const path = require('path'); // Añadida importación del módulo path
 const listEndpoints = require('express-list-endpoints'); // Añadir esta dependencia si es necesario
 
 // Cargar variables de entorno desde archivo .env
@@ -46,7 +47,7 @@ try {
 
 // Servir archivos estáticos del frontend
 // Ajusta la ruta según la estructura de tu proyecto
-app.use(express.static(path.join(__dirname, '../frontend/src')));
+app.use(express.static(path.join(__dirname, '../frontend')));
 
 
 // Añadir una ruta para ver todas las rutas disponibles
