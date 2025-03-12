@@ -48,6 +48,15 @@ try {
   console.error("❌ Error cargando las rutas:", error.message);
 }
 
+console.log("⚡ Rutas registradas en Express:");
+app._router.stack.forEach((r) => {
+  if (r.route && r.route.path) {
+    console.log(`✅ Ruta activa: ${r.route.path}`);
+  }
+});
+
+
+
 // Configuración del puerto
 const PORT = process.env.PORT || 5000;
 
