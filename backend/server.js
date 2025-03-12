@@ -27,10 +27,15 @@ app.get('/', (req, res) => {
 // Verificar si las rutas se están cargando correctamente
 try {
   // Importar y usar rutas (haremos una modificacion aqui, removeremos el /src esto porque estamos teniendo problemas en Render)
-  app.use('/api/tools', require('./src/routes/tools.routes'));
-  app.use('/api/users', require('./src/routes/users.routes'));
-  app.use('/api/loans', require('./src/routes/loans.routes'));
-  app.use('/api/notifications', require('./src/routes/notifications.routes'));
+  // app.use('/api/tools', require('./src/routes/tools.routes'));
+  // app.use('/api/users', require('./src/routes/users.routes'));
+  // app.use('/api/loans', require('./src/routes/loans.routes'));
+  // app.use('/api/notifications', require('./src/routes/notifications.routes'));
+
+  const toolsRoutes = require('./src/routes/tools.routes');
+  const usersRoutes = require('./src/routes/users.routes');
+  const loansRoutes = require('./src/routes/loans.routes');
+  const notificationsRoutes = require('./src/routes/notifications.routes');
 
   console.log("✅ Rutas cargadas correctamente");
 
