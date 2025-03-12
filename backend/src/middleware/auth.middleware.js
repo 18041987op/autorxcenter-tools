@@ -3,8 +3,13 @@ const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 
 // Middleware para proteger rutas
-exports.protect = async (req, res, next) => {
-  let token;
+const protect = (req, res, next) => {
+  console.log("Middleware protect ejecutado"); // 🚀 Esto imprimirá un log en Render
+  next(); // 🚀 Esto permitirá acceso sin token por ahora
+// };
+
+// exports.protect = async (req, res, next) => {
+//   let token;
 
   try {
     // Verificar si existe el token en los headers
