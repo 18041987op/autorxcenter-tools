@@ -37,6 +37,13 @@ const PORT = process.env.PORT || 5000;
 mongoose
   .connect(process.env.MONGO_URI)
   .then(() => {
+    console.log("⚡ Servidor iniciado. Rutas activas:"); //De aqui en adelante hasta el proximo console.log es solo para verificar rutas en Render
+    app._router.stack.forEach((r) => {
+      if (r.route && r.route.path) {
+        console.log(`✅ Ruta: ${r.route.path}`);
+      }
+    });
+
     console.log('Conexión a MongoDB establecida correctamente');
     app.listen(PORT, () => {
       console.log(`Servidor corriendo en el puerto ${PORT}`);
