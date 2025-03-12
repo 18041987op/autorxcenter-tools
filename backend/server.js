@@ -24,33 +24,42 @@ app.get('/', (req, res) => {
   res.send('API del Sistema de Control de Herramientas funcionando correctamente');
 });
 
-// Importar y usar rutas (haremos una modificacion aqui, removeremos el /src esto porque estamos teniendo problemas en Render)
-app.use('/api/tools', require('./src/routes/tools.routes'));
-app.use('/api/users', require('./src/routes/users.routes'));
-app.use('/api/loans', require('./src/routes/loans.routes'));
-app.use('/api/notifications', require('./src/routes/notifications.routes'));
+// Verificar si las rutas se están cargando correctamente
+try {
+  // Importar y usar rutas (haremos una modificacion aqui, removeremos el /src esto porque estamos teniendo problemas en Render)
+  app.use('/api/tools', require('./src/routes/tools.routes'));
+  app.use('/api/users', require('./src/routes/users.routes'));
+  app.use('/api/loans', require('./src/routes/loans.routes'));
+  app.use('/api/notifications', require('./src/routes/notifications.routes'));
+
+  console.log("✅ Rutas cargadas correctamente");
+
+  app.use('/api/tools', toolsRoutes);
+  app.use('/api/users', usersRoutes);
+  app.use('/api/loans', loansRoutes);
+  app.use('/api/notifications', notificationsRoutes);
+
+} catch (error) {
+  console.error("❌ Error cargando las rutas:", error.message);
+}
 
 // Configuración del puerto
 const PORT = process.env.PORT || 5000;
 
 // Conexión a MongoDB y arranque del servidor
-mongoose
-  .connect(process.env.MONGO_URI)
+// Conexión a MongoDB y arranque del servidor
+mongoose.connect(process.env.MONGO_URI)
   .then(() => {
-    console.log("⚡ Servidor iniciado. Rutas activas:"); //De aqui en adelante hasta el proximo console.log es solo para verificar rutas en Render
-    app._router.stack.forEach((r) => {
-      if (r.route && r.route.path) {
-        console.log(`✅ Ruta: ${r.route.path}`);
-      }
-    });
-
     console.log('Conexión a MongoDB establecida correctamente');
     app.listen(PORT, () => {
       console.log(`Servidor corriendo en el puerto ${PORT}`);
-      
-      // Iniciar verificación de préstamos vencidos
-      const notificationService = require('./src/utils/notification.util');
-      notificationService.scheduleOverdueCheck();
+
+      // Verificación de rutas activas
+      app._router.stack.forEach((r) => {
+        if (r.route && r.route.path) {
+          console.log(`✅ Ruta activa: ${r.route.path}`);
+        }
+      });
     });
   })
   .catch((err) => {
