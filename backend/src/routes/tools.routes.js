@@ -1,6 +1,7 @@
 // src/routes/tools.routes.js
 const express = require('express');
 const router = express.Router();
+
 const {
   getTools,
   getTool,
@@ -11,6 +12,11 @@ const {
 } = require('../controllers/tools.controller');
 
 const { protect, authorize } = require('../middleware/auth.middleware');
+
+router.get('/test', (req, res) => {
+  res.json({ message: "Ruta pública de prueba funcionando" }); //Ruta de prueba, eliminar despues
+});
+
 
 // Todas las rutas requieren autenticación
 router.use(protect);
