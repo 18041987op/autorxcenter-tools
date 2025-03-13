@@ -1,92 +1,87 @@
-// server.js - Punto de entrada para nuestro servidor
+// server.js configurado para servir aplicación React
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const dotenv = require('dotenv');
-const path = require('path'); // Añadida importación del módulo path
-const listEndpoints = require('express-list-endpoints'); // Añadir esta dependencia si es necesario
+const path = require('path');
+const listEndpoints = require('express-list-endpoints');
 
-// Cargar variables de entorno desde archivo .env
+// Cargar variables de entorno
 dotenv.config();
 
 // Crear la aplicación Express
 const app = express();
 
-// Middleware para procesar JSON
+// Middleware
 app.use(express.json());
-
-// Habilitar CORS para que el frontend pueda comunicarse con el backend
 app.use(cors());
-
-// Middleware para procesar datos de formularios
 app.use(express.urlencoded({ extended: true }));
 
-// Ruta básica de prueba
-app.get('/', (req, res) => {
+// Ruta básica de prueba para la API
+app.get('/api', (req, res) => {
   res.send('API del Sistema de Control de Herramientas funcionando correctamente');
 });
 
-// Verificar si las rutas se están cargando correctamente
+// Ruta para ver todas las rutas disponibles
+app.get('/api/routes', (req, res) => {
+  try {
+    const endpoints = listEndpoints(app);
+    return res.json({ success: true, routes: endpoints });
+  } catch (error) {
+    return res.status(500).json({ 
+      success: false, 
+      message: "Error al obtener rutas",
+      error: error.message 
+    });
+  }
+});
+
+// Configurar rutas de la API
 try {
-  // Importar rutas
   const toolsRoutes = require('./src/routes/tools.routes');
   const usersRoutes = require('./src/routes/users.routes');
   const loansRoutes = require('./src/routes/loans.routes');
   const notificationsRoutes = require('./src/routes/notifications.routes');
 
-  // Registrar rutas
   app.use('/api/tools', toolsRoutes);
   app.use('/api/users', usersRoutes);
   app.use('/api/loans', loansRoutes);
   app.use('/api/notifications', notificationsRoutes);
 
-  console.log("✅ Rutas cargadas correctamente");
+  console.log("✅ Rutas API cargadas correctamente");
 } catch (error) {
-  console.error("❌ Error cargando las rutas:", error.message);
+  console.error("❌ Error cargando las rutas API:", error.message);
 }
 
-// Servir archivos estáticos del frontend
-// Ajusta la ruta según la estructura de tu proyecto
-app.use(express.static(path.join(__dirname, '../frontend')));
+// IMPORTANTE: Para una aplicación React, necesitamos servir los archivos de build
+// Buscar la carpeta build del frontend
+const frontendBuildPath = path.resolve(__dirname, '../frontend/build');
+const fs = require('fs');
 
+// Verificar si la carpeta build existe
+const buildExists = fs.existsSync(frontendBuildPath);
+console.log(`${buildExists ? '✅' : '❌'} Carpeta build ${buildExists ? 'encontrada' : 'no encontrada'} en: ${frontendBuildPath}`);
 
-// Añadir una ruta para ver todas las rutas disponibles
-app.get('/api/routes', (req, res) => {
-  try {
-    // Si tienes express-list-endpoints instalado:
-    const endpoints = listEndpoints(app);
-    return res.json({ success: true, routes: endpoints });
-  } catch (error) {
-    // Fallback si no tienes express-list-endpoints
-    const routes = [];
-    
-    // Intenta extraer las rutas básicas
-    app._router.stack.forEach((middleware) => {
-      if (middleware.route) {
-        // Es una ruta directa
-        routes.push({
-          path: middleware.route.path,
-          methods: Object.keys(middleware.route.methods)
-        });
-      } else if (middleware.name === 'router') {
-        // Es un router montado
-        middleware.handle.stack.forEach((handler) => {
-          if (handler.route) {
-            const path = handler.route.path;
-            const methods = Object.keys(handler.route.methods);
-            routes.push({ path: path, methods: methods });
-          }
-        });
-      }
-    });
-    
-    return res.json({ 
-      success: true, 
-      message: "Rutas básicas detectadas (podría ser incompleto)",
-      routes: routes 
-    });
-  }
-});
+// Si build no existe, intenta crear un script para construirla
+if (!buildExists) {
+  console.log('⚠️ No se encontró la carpeta build. Es necesario ejecutar "npm run build" en el frontend.');
+  console.log('⚠️ Por ahora, solo estará disponible la API.');
+}
+
+// Servir archivos estáticos desde la carpeta build
+if (buildExists) {
+  app.use(express.static(frontendBuildPath));
+  
+  // Para aplicaciones SPA (Single Page Application) como React
+  // Todas las rutas no-API deben redirigir a index.html
+  app.get('*', (req, res) => {
+    if (!req.path.startsWith('/api')) {
+      res.sendFile(path.join(frontendBuildPath, 'index.html'));
+    }
+  });
+  
+  console.log('✅ Servidor configurado para servir la aplicación React desde la carpeta build');
+}
 
 // Configuración del puerto
 const PORT = process.env.PORT || 5000;
@@ -94,17 +89,17 @@ const PORT = process.env.PORT || 5000;
 // Conexión a MongoDB y arranque del servidor
 mongoose.connect(process.env.MONGO_URI)
   .then(() => {
-    console.log('Conexión a MongoDB establecida correctamente');
+    console.log('✅ Conexión a MongoDB establecida correctamente');
     app.listen(PORT, () => {
-      console.log(`Servidor corriendo en el puerto ${PORT}`);
-      
-      // Mostrar información sobre la aplicación disponible
-      console.log(`API disponible en: http://localhost:${PORT}`);
-      console.log(`Para ver todas las rutas disponibles: http://localhost:${PORT}/api/routes`);
+      console.log(`✅ Servidor corriendo en el puerto ${PORT}`);
+      console.log(`📡 API disponible en: http://localhost:${PORT}/api`);
+      if (buildExists) {
+        console.log(`🌐 Frontend disponible en: http://localhost:${PORT}`);
+      }
     });
   })
   .catch((err) => {
-    console.error('Error al conectar a MongoDB:', err.message);
+    console.error('❌ Error al conectar a MongoDB:', err.message);
     process.exit(1);
   });
 
